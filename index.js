@@ -1,0 +1,68 @@
+// STATE MANAGEMENT LIBRARY CODE
+
+// actions for the events that can occur in app that will change the state of our store. So if the store changes, we know that one of these events had to have occurred.
+{
+	type: 'ADD_TODO',
+	todo: {
+		id: 0,
+		name: 'Learn Redux',
+		complete: false
+	}
+}
+
+{
+	type: 'REMOVE_TODO',
+	id: 0,
+}
+
+{
+	type: 'TOGGLE_TODO',
+	id: 0,
+}
+
+{
+	type: 'ADD_GOAL',
+	goal: {
+		id: 0,
+		name: 'Run a Marathon'
+	}
+}
+
+{
+	type: 'REMOVE_GOAL',
+	id: 0
+}
+
+function createStore() {
+  // store should have four parts
+
+  // 1. The state
+  let state;
+  let listeners = []; //array of callback functions
+
+  // 2. Get the state (PUBLIC API)
+  const getState = () => state;
+
+  // 3. Listen for changes on the state (PUBLIC API)
+  // keep track of how many times the user calls subscribe and call the passed in callback
+  // subscribe returns a unsubscribe function that removes the listener function that was passed in when the user invoked subscribe
+  const subscribe = listener => {
+    listeners.push(listener);
+    return () => {
+      listeners = listeners.filter(l => l !== listener);
+    };
+  };
+
+  // 4. Update the state (PUBLIC API)
+
+	// establish strict rules on who can update the state - a collection of events that occur in our app that can change the state of our store
+	// we'll call these actions - objects which represent specfic event or action that occurs in our app that will evetnually change the state of our store
+
+  // loop through listeners, invoke each function
+
+  // returns an object that represents the store
+  return {
+    getState,
+    subscribe
+  };
+}
