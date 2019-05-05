@@ -33,6 +33,17 @@
 	id: 0
 }
 
+// when todos is invoked, it checks the action that occurred and adds it to state only if the correct criteria is met
+// if state is undefined, set it to an empty array
+function todos(state = [], action) {
+	if(action.type === 'ADD_TODO') {
+		// concat, not push. concat does not modify current state array, but rather returns a new array
+		return state.concat([action.todo])
+	}
+
+	return state
+}
+
 function createStore() {
   // store should have four parts
 
@@ -57,7 +68,9 @@ function createStore() {
 
 	// establish strict rules on who can update the state - a collection of events that occur in our app that can change the state of our store
 	// we'll call these actions - objects which represent specfic event or action that occurs in our app that will evetnually change the state of our store
+	// ex: if action.type is ADD_TODO, add the todo to the state
 
+	// needs to be a pure function
   // loop through listeners, invoke each function
 
   // returns an object that represents the store
