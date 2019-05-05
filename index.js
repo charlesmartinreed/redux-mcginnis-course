@@ -1,40 +1,41 @@
 // STATE MANAGEMENT LIBRARY CODE
 
 // actions for the events that can occur in app that will change the state of our store. So if the store changes, we know that one of these events had to have occurred.
-{
-	type: 'ADD_TODO',
-	todo: {
-		id: 0,
-		name: 'Learn Redux',
-		complete: false
-	}
-}
-
-{
-	type: 'REMOVE_TODO',
-	id: 0,
-}
-
-{
-	type: 'TOGGLE_TODO',
-	id: 0,
-}
-
-{
-	type: 'ADD_GOAL',
-	goal: {
-		id: 0,
-		name: 'Run a Marathon'
-	}
-}
-
-{
-	type: 'REMOVE_GOAL',
-	id: 0
-}
+// {
+// 	type: 'ADD_TODO',
+// 	todo: {
+// 		id: 0,
+// 		name: 'Learn Redux',
+// 		complete: false
+// 	}
+// }
+//
+// {
+// 	type: 'REMOVE_TODO',
+// 	id: 0,
+// }
+//
+// {
+// 	type: 'TOGGLE_TODO',
+// 	id: 0,
+// }
+//
+// {
+// 	type: 'ADD_GOAL',
+// 	goal: {
+// 		id: 0,
+// 		name: 'Run a Marathon'
+// 	}
+// }
+//
+// {
+// 	type: 'REMOVE_GOAL',
+// 	id: 0
+// }
 
 // when todos is invoked, it checks the action that occurred and adds it to state only if the correct criteria is met
 // if state is undefined, set it to an empty array
+// reducer function - takes in state and action and reduces those into a brand new state
 function todos(state = [], action) {
 	if(action.type === 'ADD_TODO') {
 		// concat, not push. concat does not modify current state array, but rather returns a new array
@@ -44,11 +45,11 @@ function todos(state = [], action) {
 	return state
 }
 
-function createStore() {
+function createStore(reducer) {
   // store should have four parts
 
   // 1. The state
-  let state;
+  let state; //undefined because we'll set state strictly using our reducer methods, such as todos()
   let listeners = []; //array of callback functions
 
   // 2. Get the state (PUBLIC API)
@@ -73,9 +74,28 @@ function createStore() {
 	// needs to be a pure function
   // loop through listeners, invoke each function
 
+	const dispatch = (action) => {
+		// call our todos reducer function that gets us the new state
+		state = reducer(state, action)
+
+		// loop over listeners and invoke them
+		listeners.forEach((listener) => listener())
+	}
+
   // returns an object that represents the store
   return {
     getState,
-    subscribe
+    subscribe,
+		dispatch
   };
 }
+
+const store = createStore(todos); //has getState, subscribe and dispatch methods
+store.dispatch({
+		type: 'ADD_TODO',
+		todo: {
+			id: 0,
+			name: 'Learn Redux',
+			complete: false
+		}
+}) // we dispatch ACTIONS to change the state of our application
