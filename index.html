@@ -6,6 +6,11 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <title>Todos/Goals</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/redux/4.0.1/redux.min.js"></script>
+
+    <!-- REACT, REACT.DOM and BABEL -->
+    <script src="https://unpkg.com/react@16.3.0-alpha.1/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@16.3.0-alpha.1/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/babel-standalone@6.15.0/babel.min.js"></script>
   </head>
   <body>
     <!-- UI CODE -->
@@ -22,6 +27,9 @@
       <button id="goalBtn">Add Goal</button>
       <ul id="goals"></ul>
     </div>
+    <hr />
+    <!-- REACT IS MOUNTED HERE -->
+    <div id="app"></div>
 
     <script type="text/javascript">
       // ID generator
@@ -117,31 +125,6 @@
       }
 
       // Redux middleware
-      // function checker(store) {
-      //   // uses 'currying', which allows us to use the evaluation from a function to run the following function.
-      //   // next is either the next middleware in the chain, or dispatch, which calls the reducer
-      //   return function(next) {
-      //     return function(action) {
-      //       // middleware code begins here
-      //       if (
-      //         action.type === ADD_TODO &&
-      //         action.todo.name.toLowerCase().includes("bitcoin")
-      //       ) {
-      //         return alert("Nah bruh, Bitcoin is not in your best interest");
-      //       }
-      //
-      //       if (
-      //         action.type === ADD_GOAL &&
-      //         action.goal.name.toLowerCase().includes("bitcoin")
-      //       ) {
-      //         return alert("Nah bruh, Bitcoin is not in your best interest");
-      //       }
-      //
-      //       return next(action);
-      //     };
-      //   };
-      // }
-
       // ES6 version of middleware, utilizing the implicit return of arrow funcitons
       const checker = store => next => action => {
         if (
@@ -159,6 +142,18 @@
         }
 
         return next(action);
+      };
+
+      const logger = store => next => action => {
+        console.group(action.type);
+        console.log("The action: ", action);
+
+        // if logger is the last middleware, it will be the same as calling dispatch
+        const results = next(action);
+        console.log("The new state: ", store.getState());
+        console.groupEnd();
+
+        return results;
       };
 
       function todos(state = [], action) {
@@ -201,12 +196,13 @@
 
       // Redux's built in root reducer takes in an object, where each prop is a reducer
       // checker is our middleware function, passed as the second argument to Redux.createStore
+      // when checker calls next, it triggers the logger, when logger calls next it triggers our dispatch
       const store = Redux.createStore(
         Redux.combineReducers({
           todos,
           goals
         }),
-        Redux.applyMiddleware(checker)
+        Redux.applyMiddleware(checker, logger)
       );
 
       // take state of store and use it to update dom
@@ -217,8 +213,8 @@
         document.getElementById("goals").innerHTML = "";
         document.getElementById("todos").innerHTML = "";
 
-        console.log("goals", goals);
-        console.log("todos", todos);
+        // console.log("goals", goals);
+        // console.log("todos", todos);
 
         todos.forEach(addTodoToDOM);
         goals.forEach(addGoalToDOM);
@@ -300,6 +296,16 @@
 
         document.getElementById("goals").appendChild(node);
       }
+    </script>
+
+    <script type="text/babel">
+      class App extends React.Component {
+        render() {
+          return <div>REACT APP</div>;
+        }
+      }
+
+      ReactDOM.render(<App />, document.getElementById("app"));
     </script>
   </body>
 </html>
