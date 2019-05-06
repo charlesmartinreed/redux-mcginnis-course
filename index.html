@@ -169,9 +169,44 @@
 
       const store = createStore(app);
 
-      const unsubscribe = store.subscribe(() => {
-        console.log("The new state is: ", store.getState());
+      // take state of store and use it to update dom
+      store.subscribe(() => {
+        const { goals, todos } = store.getState();
+
+        // this will prevent new goals from being added atop of the old goals in the DOM
+        document.getElementById("goals").innerHTML = "";
+        document.getElementById("todos").innerHTML = "";
+
+        todos.forEach(addTodoToDOM);
+        goals.forEach(addGoalToDOM);
       });
+
+      // LIST ITEM EVENT LISTENERS
+      document.getElementById("");
+
+      // dom updating functions
+      function addTodoToDOM(todo) {
+        const { name, complete, id } = todo;
+
+        const node = document.createElement("li");
+        const text = document.createTextNode(name);
+        node.appendChild(text);
+
+        node.addEventListener("click", () => {
+          store.dispatch(toggleTodoAction(id));
+        });
+        node.style.textDecoration = complete ? "line-through" : "none";
+
+        document.getElementById("todos").appendChild(node);
+      }
+
+      function addGoalToDOM(goal) {
+        const node = document.createElement("li");
+        const text = document.createTextNode(goal.name);
+        node.appendChild(text);
+
+        document.getElementById("goals").appendChild(node);
+      }
 
       // using our action creator, we can pass along our todo item like so:
       // store.dispatch(
