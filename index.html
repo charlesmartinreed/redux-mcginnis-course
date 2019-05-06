@@ -116,7 +116,34 @@
         };
       }
 
-      function checkAndDispatch(store, action) {
+      // Redux middleware
+      // function checker(store) {
+      //   // uses 'currying', which allows us to use the evaluation from a function to run the following function.
+      //   // next is either the next middleware in the chain, or dispatch, which calls the reducer
+      //   return function(next) {
+      //     return function(action) {
+      //       // middleware code begins here
+      //       if (
+      //         action.type === ADD_TODO &&
+      //         action.todo.name.toLowerCase().includes("bitcoin")
+      //       ) {
+      //         return alert("Nah bruh, Bitcoin is not in your best interest");
+      //       }
+      //
+      //       if (
+      //         action.type === ADD_GOAL &&
+      //         action.goal.name.toLowerCase().includes("bitcoin")
+      //       ) {
+      //         return alert("Nah bruh, Bitcoin is not in your best interest");
+      //       }
+      //
+      //       return next(action);
+      //     };
+      //   };
+      // }
+
+      // ES6 version of middleware, utilizing the implicit return of arrow funcitons
+      const checker = store => next => action => {
         if (
           action.type === ADD_TODO &&
           action.todo.name.toLowerCase().includes("bitcoin")
@@ -131,8 +158,8 @@
           return alert("Nah bruh, Bitcoin is not in your best interest");
         }
 
-        return store.dispatch(action);
-      }
+        return next(action);
+      };
 
       function todos(state = [], action) {
         switch (action.type) {
@@ -173,11 +200,13 @@
       //importing via CDN gives us a global object, Redux.
 
       // Redux's built in root reducer takes in an object, where each prop is a reducer
+      // checker is our middleware function, passed as the second argument to Redux.createStore
       const store = Redux.createStore(
         Redux.combineReducers({
           todos,
           goals
-        })
+        }),
+        Redux.applyMiddleware(checker)
       );
 
       // take state of store and use it to update dom
@@ -206,8 +235,7 @@
         const name = input.value;
         input.value = "";
 
-        checkAndDispatch(
-          store,
+        store.dispatch(
           addTodoAction({
             id: generateId(),
             name,
@@ -221,8 +249,7 @@
         const name = input.value;
         input.value = "";
 
-        checkAndDispatch(
-          store,
+        store.dispatch(
           addGoalAction({
             id: generateId(),
             name
@@ -246,14 +273,14 @@
         const node = document.createElement("li");
         const text = document.createTextNode(name);
         const removeBtn = createRemoveButton(() => {
-          checkAndDispatch(store, removeTodoAction(id));
+          store.dispatch(removeTodoAction(id));
         });
 
         node.appendChild(text);
         node.appendChild(removeBtn);
 
         node.addEventListener("click", () => {
-          checkAndDispatch(store, toggleTodoAction(id));
+          store.dispatch(toggleTodoAction(id));
         });
         node.style.textDecoration = complete ? "line-through" : "none";
 
@@ -265,7 +292,7 @@
         const node = document.createElement("li");
         const text = document.createTextNode(name);
         const removeBtn = createRemoveButton(() => {
-          checkAndDispatch(store, removeGoalAction(id));
+          store.dispatch(removeGoalAction(id));
         });
 
         node.appendChild(text);
