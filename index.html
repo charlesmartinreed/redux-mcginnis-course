@@ -13,21 +13,6 @@
     <script src="https://unpkg.com/babel-standalone@6.15.0/babel.min.js"></script>
   </head>
   <body>
-    <!-- UI CODE -->
-    <div>
-      <h1>Todo List</h1>
-      <input type="text" id="todo" placeholder="Add Todo" />
-      <button id="todoBtn">Add Todo</button>
-      <ul id="todos"></ul>
-    </div>
-
-    <div>
-      <h1>Goals</h1>
-      <input type="text" id="goal" placeholder="Add Goal" />
-      <button id="goalBtn">Add Goal</button>
-      <ul id="goals"></ul>
-    </div>
-    <hr />
     <!-- REACT IS MOUNTED HERE -->
     <div id="app"></div>
 
@@ -40,44 +25,6 @@
             .substring(2) + new Date().getTime().toString(36)
         );
       }
-
-      // LIBRARY CODE - what you'd download
-      // check out our Redux.createStore beneath - this app is scaffolded in such a manner that we essentially implement Redux without actually implementing it.
-
-      // function createStore(reducer) {
-      //   // store should have four parts
-      //
-      //   // 1. The state
-      //   let state; //undefined because we'll set state strictly using our reducer methods, such as app()
-      //   let listeners = []; //array of callback functions
-      //
-      //   // 2. Get the state (PUBLIC API)
-      //   const getState = () => state;
-      //
-      //   // 3. Listen for changes on the state (PUBLIC API)
-      //   const subscribe = listener => {
-      //     listeners.push(listener);
-      //     return () => {
-      //       listeners = listeners.filter(l => l !== listener);
-      //     };
-      //   };
-      //
-      //   // 4. Update the state (PUBLIC API)
-      //   const dispatch = action => {
-      //     // call our todos reducer function that gets us the new state
-      //     state = reducer(state, action);
-      //
-      //     // loop over listeners and invoke them
-      //     listeners.forEach(listener => listener());
-      //   };
-      //
-      //   // returns an object that represents the store
-      //   return {
-      //     getState,
-      //     subscribe,
-      //     dispatch
-      //   };
-      // }
 
       // APP CODE - what you'd write
 
@@ -184,19 +131,6 @@
         }
       }
 
-      // root reducers to the rescue! Our state is an object with a todos and goals property that utilize those respective reducer functions
-
-      // function app(state = {}, action) {
-      //   return {
-      //     todos: todos(state.todos, action),
-      //     goals: goals(state.goals, action)
-      //   };
-      // }
-      //importing via CDN gives us a global object, Redux.
-
-      // Redux's built in root reducer takes in an object, where each prop is a reducer
-      // checker is our middleware function, passed as the second argument to Redux.createStore
-      // when checker calls next, it triggers the logger, when logger calls next it triggers our dispatch
       const store = Redux.createStore(
         Redux.combineReducers({
           todos,
@@ -204,98 +138,6 @@
         }),
         Redux.applyMiddleware(checker, logger)
       );
-
-      // take state of store and use it to update dom
-      store.subscribe(() => {
-        const { goals, todos } = store.getState();
-
-        // this will prevent new goals from being added atop of the old goals in the DOM
-        document.getElementById("goals").innerHTML = "";
-        document.getElementById("todos").innerHTML = "";
-
-        // console.log("goals", goals);
-        // console.log("todos", todos);
-
-        todos.forEach(addTodoToDOM);
-        goals.forEach(addGoalToDOM);
-      });
-
-      // Event Listeners
-      document.getElementById("todoBtn").addEventListener("click", addTodo);
-      document.getElementById("goalBtn").addEventListener("click", addGoal);
-
-      // DOM code
-      function addTodo() {
-        //grab input value from input field, dispatch an action to add those values to our state
-        const input = document.getElementById("todo");
-        const name = input.value;
-        input.value = "";
-
-        store.dispatch(
-          addTodoAction({
-            id: generateId(),
-            name,
-            complete: false
-          })
-        );
-      }
-
-      function addGoal() {
-        const input = document.getElementById("goal");
-        const name = input.value;
-        input.value = "";
-
-        store.dispatch(
-          addGoalAction({
-            id: generateId(),
-            name
-          })
-        );
-      }
-
-      // delete button - takes a callback that will be executed on click
-      function createRemoveButton(onClick) {
-        const removeBtn = document.createElement("button");
-        removeBtn.innerHTML = "X";
-        removeBtn.addEventListener("click", onClick);
-
-        return removeBtn;
-      }
-
-      // dom updating functions
-      function addTodoToDOM(todo) {
-        const { name, complete, id } = todo;
-
-        const node = document.createElement("li");
-        const text = document.createTextNode(name);
-        const removeBtn = createRemoveButton(() => {
-          store.dispatch(removeTodoAction(id));
-        });
-
-        node.appendChild(text);
-        node.appendChild(removeBtn);
-
-        node.addEventListener("click", () => {
-          store.dispatch(toggleTodoAction(id));
-        });
-        node.style.textDecoration = complete ? "line-through" : "none";
-
-        document.getElementById("todos").appendChild(node);
-      }
-
-      function addGoalToDOM(goal) {
-        const { name, id } = goal;
-        const node = document.createElement("li");
-        const text = document.createTextNode(name);
-        const removeBtn = createRemoveButton(() => {
-          store.dispatch(removeGoalAction(id));
-        });
-
-        node.appendChild(text);
-        node.appendChild(removeBtn);
-
-        document.getElementById("goals").appendChild(node);
-      }
     </script>
 
     <script type="text/babel">
