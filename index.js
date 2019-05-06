@@ -163,3 +163,23 @@ store.dispatch(
     complete: false
   })
 );
+
+// or we can remove todo like so
+store.dispatch(removeTodoAction(1));
+store.dispatch(toggleTodoAction(0));
+
+store.dispatch(
+  addGoalAction({
+    id: 0,
+    name: "Learn how to fly a plane"
+  })
+);
+
+store.dispatch(
+  addGoalAction({
+    id: 1,
+    name: "Lose 20 pounds"
+  })
+);
+
+store.dispatch(removeGoalAction(0));
