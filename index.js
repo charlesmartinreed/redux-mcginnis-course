@@ -1,41 +1,5 @@
 // STATE MANAGEMENT LIBRARY CODE
 
-// actions for the events that can occur in app that will change the state of our store. So if the store changes, we know that one of these events had to have occurred.
-// {
-// 	type: 'ADD_TODO',
-// 	todo: {
-// 		id: 0,
-// 		name: 'Learn Redux',
-// 		complete: false
-// 	}
-// }
-//
-// {
-// 	type: 'REMOVE_TODO',
-// 	id: 0,
-// }
-//
-// {
-// 	type: 'TOGGLE_TODO',
-// 	id: 0,
-// }
-//
-// {
-// 	type: 'ADD_GOAL',
-// 	goal: {
-// 		id: 0,
-// 		name: 'Run a Marathon'
-// 	}
-// }
-//
-// {
-// 	type: 'REMOVE_GOAL',
-// 	id: 0
-// }
-
-// when todos is invoked, it checks the action that occurred and adds it to state only if the correct criteria is met
-// if state is undefined, set it to an empty array
-// reducer function - takes in state and action and reduces those into a brand new state
 function todos(state = [], action) {
   switch (action.type) {
     case "ADD_TODO":
@@ -51,29 +15,41 @@ function todos(state = [], action) {
     default:
       return state;
   }
-  // if (action.type === "ADD_TODO") {
-  //   // concat, not push. concat does not modify current state array, but rather returns a new array
-  //   return state.concat([action.todo]);
-  // } else if (action.type === "REMOVE_TODO") {
-  //   // so we want to filter out the todo from our state that has a matching ID
-  //   return state.filter(todo => todo.id !== action.id);
-  // } else if (action.type === "TOGGLE_TODO") {
-  //   // because this is a pure function, we need to make sure that we are not modfiying the old object - object.assign to merge the old object and ALL of its properties with the new object
-  //   return state.map(todo =>
-  //     todo.id !== action.id
-  //       ? todo
-  //       : Object.assign({}, todo, { complete: !todo.complete })
-  //   );
-  // } else {
-  //   return state;
-  // }
 }
 
+function goals(state = [], action) {
+  switch (action.type) {
+    case "ADD_GOAL":
+      return state.concat([action.goal]);
+    case "REMOVE_GOAL":
+      return state.filter(goal => goal.id !== action.id);
+    default:
+      return state;
+  }
+}
+
+// with our two reducers, the point is to get us to the nextState, either of the goals array or the todos array.
+// if that's the case, we want oru state to look something like this
+// {
+// 	todos: [],
+// 	goals: []
+// }
+
+// root reducers to the rescue! Our state is an object with a todos and goals property that utilize those respective reducer functions
+
+function app(state = {}, action) {
+  return {
+    todos: todos(state.todos, action),
+    goals: goals(state.goals, action)
+  };
+}
+
+// app reducer gets passed in here
 function createStore(reducer) {
   // store should have four parts
 
   // 1. The state
-  let state; //undefined because we'll set state strictly using our reducer methods, such as todos()
+  let state; //undefined because we'll set state strictly using our reducer methods, such as app()
   let listeners = []; //array of callback functions
 
   // 2. Get the state (PUBLIC API)
@@ -114,12 +90,67 @@ function createStore(reducer) {
   };
 }
 
-const store = createStore(todos); //has getState, subscribe and dispatch methods
+// TEST CASES
+const store = createStore(app);
+
+store.subscribe(() => {
+  console.log("The new state is: ", store.getState());
+});
+
 store.dispatch({
   type: "ADD_TODO",
   todo: {
     id: 0,
-    name: "Learn Redux",
+    name: "Walk the dog",
     complete: false
   }
-}); // we dispatch ACTIONS to change the state of our application
+});
+
+store.dispatch({
+  type: "ADD_TODO",
+  todo: {
+    id: 1,
+    name: "Wash the car",
+    complete: false
+  }
+});
+
+store.dispatch({
+  type: "ADD_TODO",
+  todo: {
+    id: 2,
+    name: "Go to the gym",
+    complete: true
+  }
+});
+
+store.dispatch({
+  type: "REMOVE_TODO",
+  id: 1
+});
+
+store.dispatch({
+  type: "TOGGLE_TODO",
+  id: 0
+});
+
+store.dispatch({
+  type: "ADD_GOAL",
+  goal: {
+    id: 0,
+    name: "Learn Redux"
+  }
+});
+
+store.dispatch({
+  type: "ADD_GOAL",
+  goal: {
+    id: 1,
+    name: "Lose 20 pounds"
+  }
+});
+
+store.dispatch({
+  type: "REMOVE_GOAL",
+  id: 0
+});
