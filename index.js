@@ -1,50 +1,4 @@
-// STATE MANAGEMENT LIBRARY CODE
-
-function todos(state = [], action) {
-  switch (action.type) {
-    case "ADD_TODO":
-      return state.concat([action.todo]);
-    case "REMOVE_TODO":
-      return state.filter(todo => todo.id !== action.id);
-    case "TOGGLE_TODO":
-      return state.map(todo =>
-        todo.id !== action.id
-          ? todo
-          : Object.assign({}, todo, { complete: !todo.complete })
-      );
-    default:
-      return state;
-  }
-}
-
-function goals(state = [], action) {
-  switch (action.type) {
-    case "ADD_GOAL":
-      return state.concat([action.goal]);
-    case "REMOVE_GOAL":
-      return state.filter(goal => goal.id !== action.id);
-    default:
-      return state;
-  }
-}
-
-// with our two reducers, the point is to get us to the nextState, either of the goals array or the todos array.
-// if that's the case, we want oru state to look something like this
-// {
-// 	todos: [],
-// 	goals: []
-// }
-
-// root reducers to the rescue! Our state is an object with a todos and goals property that utilize those respective reducer functions
-
-function app(state = {}, action) {
-  return {
-    todos: todos(state.todos, action),
-    goals: goals(state.goals, action)
-  };
-}
-
-// app reducer gets passed in here
+// LIBRARY CODE - what you'd download
 function createStore(reducer) {
   // store should have four parts
 
@@ -90,67 +44,122 @@ function createStore(reducer) {
   };
 }
 
-// TEST CASES
+// APP CODE - what you'd write
+
+// let's get rid of our stringly typed switch comparisons...
+const ADD_TODO = "ADD_TODO";
+const REMOVE_TODO = "REMOVE_TODO";
+const TOGGLE_TODO = "TOGGLE_TODO";
+const ADD_GOAL = "ADD_GOAL";
+const REMOVE_GOAL = "REMOVE_GOAL";
+
+// ACTION CREATOR - return an action. This will be invoked by our dispatch.
+function addTodoAction(todo) {
+  return {
+    type: ADD_TODO,
+    todo
+  };
+}
+
+function removeTodoAction(id) {
+  return {
+    type: REMOVE_TODO,
+    id
+  };
+}
+
+function toggleTodoAction(id) {
+  return {
+    type: TOGGLE_TODO,
+    id
+  };
+}
+
+function addGoalAction(goal) {
+  return {
+    type: ADD_GOAL,
+    goal
+  };
+}
+
+function removeGoalAction(id) {
+  return {
+    type: REMOVE_GOAL,
+    id
+  };
+}
+
+function todos(state = [], action) {
+  switch (action.type) {
+    case ADD_TODO:
+      return state.concat([action.todo]);
+    case REMOVE_TODO:
+      return state.filter(todo => todo.id !== action.id);
+    case TOGGLE_TODO:
+      return state.map(todo =>
+        todo.id !== action.id
+          ? todo
+          : Object.assign({}, todo, { complete: !todo.complete })
+      );
+    default:
+      return state;
+  }
+}
+
+function goals(state = [], action) {
+  switch (action.type) {
+    case ADD_GOAL:
+      return state.concat([action.goal]);
+    case REMOVE_GOAL:
+      return state.filter(goal => goal.id !== action.id);
+    default:
+      return state;
+  }
+}
+
+// with our two reducers, the point is to get us to the nextState, either of the goals array or the todos array.
+// if that's the case, we want oru state to look something like this
+// {
+// 	todos: [],
+// 	goals: []
+// }
+
+// root reducers to the rescue! Our state is an object with a todos and goals property that utilize those respective reducer functions
+
+function app(state = {}, action) {
+  return {
+    todos: todos(state.todos, action),
+    goals: goals(state.goals, action)
+  };
+}
+
 const store = createStore(app);
 
 store.subscribe(() => {
   console.log("The new state is: ", store.getState());
 });
 
-store.dispatch({
-  type: "ADD_TODO",
-  todo: {
+// using our action creator, we can pass along our todo item like so:
+store.dispatch(
+  addTodoAction({
     id: 0,
     name: "Walk the dog",
     complete: false
-  }
-});
+  })
+);
 
-store.dispatch({
-  type: "ADD_TODO",
-  todo: {
+store.dispatch(
+  addTodoAction({
     id: 1,
-    name: "Wash the car",
-    complete: false
-  }
-});
-
-store.dispatch({
-  type: "ADD_TODO",
-  todo: {
-    id: 2,
     name: "Go to the gym",
     complete: true
-  }
-});
+  })
+);
 
-store.dispatch({
-  type: "REMOVE_TODO",
-  id: 1
-});
-
-store.dispatch({
-  type: "TOGGLE_TODO",
-  id: 0
-});
-
-store.dispatch({
-  type: "ADD_GOAL",
-  goal: {
-    id: 0,
-    name: "Learn Redux"
-  }
-});
-
-store.dispatch({
-  type: "ADD_GOAL",
-  goal: {
-    id: 1,
-    name: "Lose 20 pounds"
-  }
-});
-
-store.dispatch({
-  type: "REMOVE_GOAL",
-  id: 0
-});
+store.dispatch(
+  addTodoAction({
+    id: 2,
+    name: "Finish Sekiro",
+    complete: false
+  })
+);
