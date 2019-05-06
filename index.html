@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <title>Todos/Goals</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/redux/4.0.1/redux.min.js"></script>
   </head>
   <body>
     <!-- UI CODE -->
@@ -33,40 +34,42 @@
       }
 
       // LIBRARY CODE - what you'd download
-      function createStore(reducer) {
-        // store should have four parts
+      // check out our Redux.createStore beneath - this app is scaffolded in such a manner that we essentially implement Redux without actually implementing it.
 
-        // 1. The state
-        let state; //undefined because we'll set state strictly using our reducer methods, such as app()
-        let listeners = []; //array of callback functions
-
-        // 2. Get the state (PUBLIC API)
-        const getState = () => state;
-
-        // 3. Listen for changes on the state (PUBLIC API)
-        const subscribe = listener => {
-          listeners.push(listener);
-          return () => {
-            listeners = listeners.filter(l => l !== listener);
-          };
-        };
-
-        // 4. Update the state (PUBLIC API)
-        const dispatch = action => {
-          // call our todos reducer function that gets us the new state
-          state = reducer(state, action);
-
-          // loop over listeners and invoke them
-          listeners.forEach(listener => listener());
-        };
-
-        // returns an object that represents the store
-        return {
-          getState,
-          subscribe,
-          dispatch
-        };
-      }
+      // function createStore(reducer) {
+      //   // store should have four parts
+      //
+      //   // 1. The state
+      //   let state; //undefined because we'll set state strictly using our reducer methods, such as app()
+      //   let listeners = []; //array of callback functions
+      //
+      //   // 2. Get the state (PUBLIC API)
+      //   const getState = () => state;
+      //
+      //   // 3. Listen for changes on the state (PUBLIC API)
+      //   const subscribe = listener => {
+      //     listeners.push(listener);
+      //     return () => {
+      //       listeners = listeners.filter(l => l !== listener);
+      //     };
+      //   };
+      //
+      //   // 4. Update the state (PUBLIC API)
+      //   const dispatch = action => {
+      //     // call our todos reducer function that gets us the new state
+      //     state = reducer(state, action);
+      //
+      //     // loop over listeners and invoke them
+      //     listeners.forEach(listener => listener());
+      //   };
+      //
+      //   // returns an object that represents the store
+      //   return {
+      //     getState,
+      //     subscribe,
+      //     dispatch
+      //   };
+      // }
 
       // APP CODE - what you'd write
 
@@ -143,14 +146,21 @@
 
       // root reducers to the rescue! Our state is an object with a todos and goals property that utilize those respective reducer functions
 
-      function app(state = {}, action) {
-        return {
-          todos: todos(state.todos, action),
-          goals: goals(state.goals, action)
-        };
-      }
+      // function app(state = {}, action) {
+      //   return {
+      //     todos: todos(state.todos, action),
+      //     goals: goals(state.goals, action)
+      //   };
+      // }
+      //importing via CDN gives us a global object, Redux.
 
-      const store = createStore(app);
+      // Redux's built in root reducer takes in an object, where each prop is a reducer
+      const store = Redux.createStore(
+        Redux.combineReducers({
+          todos,
+          goals
+        })
+      );
 
       // take state of store and use it to update dom
       store.subscribe(() => {
