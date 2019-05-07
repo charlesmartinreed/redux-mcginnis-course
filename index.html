@@ -200,16 +200,14 @@
       class Todos extends React.Component {
         addItem = e => {
           e.preventDefault();
-          const name = this.input.value;
-          this.input.value = "";
 
-          this.props.store.dispatch(
-            addTodoAction({
-              id: generateId(),
-              name,
-              complete: false
+          // before calling dispatch, we need to save remotely
+          return API.saveTodo(this.input.value)
+            .then(todo => {
+              this.props.store.dispatch(addTodoAction(todo));
+              this.input.value = "";
             })
-          );
+            .catch(() => alert("Error! Try adding your todo again, please."));
         };
 
         // have to update the database AND local right now - remove from DB first, get confirmation and then remove from local
@@ -253,15 +251,13 @@
       class Goals extends React.Component {
         addItem = e => {
           e.preventDefault;
-          const name = this.input.value;
-          this.input.value = "";
 
-          this.props.store.dispatch(
-            addGoalAction({
-              id: generateId(),
-              name
+          return API.saveGoal(this.input.value)
+            .then(goal => {
+              this.props.store.dispatch(addGoalAction(goal));
+              this.input.value = "";
             })
-          );
+            .catch(() => alert("Error! Try adding your goal again, please."));
         };
 
         removeItem = goal => {
