@@ -12,6 +12,9 @@
     <script src="https://unpkg.com/react-dom@16.3.0-alpha.1/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/babel-standalone@6.15.0/babel.min.js"></script>
 
+    <!-- THUNK -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/redux-thunk/2.3.0/redux-thunk.min.js"></script>
+
     <!-- FAKE API REQUEST -->
     <script
       src="https://tylermcginnis.com/goals-todos-api/index.js"
@@ -149,7 +152,7 @@
         }
       );
 
-      function handleFetch() {
+      function handleInitialFetch() {
         return dispatch => {
           Promise.all([API.fetchTodos(), API.fetchGoals()])
             .then(([todos, goals]) => {
@@ -191,14 +194,14 @@
         return results;
       };
 
-      const thunk = store => next => action => {
-        if (typeof action === "function") {
-          // invoke that action, pass it dispatch
-          return action(store.dispatch);
-        }
-        //either next middleware in chain, or dispatch itself
-        return next(action);
-      };
+      // const thunk = store => next => action => {
+      //   if (typeof action === "function") {
+      //     // invoke that action, pass it dispatch
+      //     return action(store.dispatch);
+      //   }
+      //   //either next middleware in chain, or dispatch itself
+      //   return next(action);
+      // };
 
       // REDUCERS
       // action.todos is an array of the todos for our initial app state
@@ -251,7 +254,7 @@
           goals,
           loading
         }),
-        Redux.applyMiddleware(thunk, checker, logger)
+        Redux.applyMiddleware(ReduxThunk.default, checker, logger)
       );
     </script>
 
@@ -350,7 +353,7 @@
         componentDidMount() {
           const { store } = this.props;
 
-          this.props.store.dispatch(handleFetch());
+          store.dispatch(handleInitialFetch());
 
           store.subscribe(() => this.forceUpdate());
         }
