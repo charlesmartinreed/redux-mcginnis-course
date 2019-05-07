@@ -43,6 +43,7 @@
       const RECEIVE_DATA = "RECEIVE_DATA";
 
       // ACTION CREATOR - return an action. This will be invoked by our dispatch.
+      // if being passed object to dispatch, Redux should dispatch as normal. If being passed a function to dispatch, it should invoke that method, passing it dispatch.
       function addTodoAction(todo) {
         return {
           type: ADD_TODO,
@@ -86,7 +87,19 @@
         };
       }
 
-      // Redux middleware
+      // async code is here in the action creator rather than in the UI code/component
+      function handleDeleteTodo(todo) {
+        // return a function that is passed our dispatch - this gives us access to call dispatch whenever we need it
+        return dispatch => {
+          dispatch(removeTodoAction(todo.id));
+          return API.deleteTodo(todo.id).catch(() => {
+            dispatch(addTodoAction(todo));
+            alert("Ahhhh! An error occurred, please try again.");
+          });
+        };
+      }
+
+      // REDUX MIDDLEWARE
       // ES6 version of middleware, utilizing the implicit return of arrow funcitons
       const checker = store => next => action => {
         if (
@@ -116,6 +129,15 @@
         console.groupEnd();
 
         return results;
+      };
+
+      const thunk = store => next => action => {
+        if (typeof action === "function") {
+          // invoke that action, pass it dispatch
+          return action(store.dispatch);
+        }
+        //either next middleware in chain, or dispatch itself
+        return next(action);
       };
 
       // REDUCERS
@@ -169,7 +191,7 @@
           goals,
           loading
         }),
-        Redux.applyMiddleware(checker, logger)
+        Redux.applyMiddleware(thunk, checker, logger)
       );
     </script>
 
@@ -210,14 +232,8 @@
             .catch(() => alert("Error! Try adding your todo again, please."));
         };
 
-        // have to update the database AND local right now - remove from DB first, get confirmation and then remove from local
-        // 'optimistic' update - remove locally first, attempt to delete remotely, if remote delete fails, add it back
         removeItem = todo => {
-          this.props.store.dispatch(removeTodoAction(todo.id));
-          return API.deleteTodo(todo.id).catch(() => {
-            this.props.store.dispatch(addTodoAction(todo));
-            alert("Ahhhh! An error occurred, please try again.");
-          });
+          this.props.store.dispatch(handleDeleteTodo(todo));
         };
 
         toggleItem = id => {
