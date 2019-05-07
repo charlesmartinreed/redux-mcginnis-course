@@ -11,6 +11,12 @@
     <script src="https://unpkg.com/react@16.3.0-alpha.1/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@16.3.0-alpha.1/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/babel-standalone@6.15.0/babel.min.js"></script>
+
+    <!-- FAKE API REQUEST -->
+    <script
+      src="https://tylermcginnis.com/goals-todos-api/index.js"
+      charset="utf-8"
+    ></script>
   </head>
   <body>
     <!-- REACT IS MOUNTED HERE -->
@@ -34,6 +40,7 @@
       const TOGGLE_TODO = "TOGGLE_TODO";
       const ADD_GOAL = "ADD_GOAL";
       const REMOVE_GOAL = "REMOVE_GOAL";
+      const RECEIVE_DATA = "RECEIVE_DATA";
 
       // ACTION CREATOR - return an action. This will be invoked by our dispatch.
       function addTodoAction(todo) {
@@ -71,6 +78,14 @@
         };
       }
 
+      function receiveDataAction(todos, goals) {
+        return {
+          type: RECEIVE_DATA,
+          goals,
+          todos
+        };
+      }
+
       // Redux middleware
       // ES6 version of middleware, utilizing the implicit return of arrow funcitons
       const checker = store => next => action => {
@@ -103,6 +118,8 @@
         return results;
       };
 
+      // REDUCERS
+      // action.todos is an array of the todos for our initial app state
       function todos(state = [], action) {
         switch (action.type) {
           case ADD_TODO:
@@ -115,17 +132,22 @@
                 ? todo
                 : Object.assign({}, todo, { complete: !todo.complete })
             );
+          case RECEIVE_DATA:
+            return action.todos;
           default:
             return state;
         }
       }
 
+      // action.goals is an array of the goals for our initial app state
       function goals(state = [], action) {
         switch (action.type) {
           case ADD_GOAL:
             return state.concat([action.goal]);
           case REMOVE_GOAL:
             return state.filter(goal => goal.id !== action.id);
+          case RECEIVE_DATA:
+            return action.goals;
           default:
             return state;
         }
@@ -238,10 +260,17 @@
           );
         }
       }
-
+      // API is provided by tyler's script in the HEAD
       class App extends React.Component {
         componentDidMount() {
           const { store } = this.props;
+
+          Promise.all([API.fetchTodos(), API.fetchGoals()]).then(
+            ([todos, goals]) => {
+              store.dispatch(receiveDataAction(todos, goals));
+            }
+          );
+
           store.subscribe(() => this.forceUpdate());
         }
 
