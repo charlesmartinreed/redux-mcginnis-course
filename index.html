@@ -325,19 +325,9 @@
         }
       }
 
-      class ConnectedTodos extends React.Component {
-        render() {
-          return (
-            <Context.Consumer>
-              {store => {
-                const { todos } = store.getState();
-
-                return <Todos todos={todos} dispatch={store.dispatch} />;
-              }}
-            </Context.Consumer>
-          );
-        }
-      }
+      const ConnectedTodos = connect(state => ({
+        todos: state.todos
+      }))(Todos);
 
       class Goals extends React.Component {
         addItem = e => {
@@ -369,32 +359,20 @@
         }
       }
 
-      class ConnectedGoals extends React.Component {
-        render() {
-          return (
-            <Context.Consumer>
-              {store => {
-                const { goals } = store.getState();
-
-                return <Goals goals={goals} dispatch={store.dispatch} />;
-              }}
-            </Context.Consumer>
-          );
-        }
-      }
+      const ConnectedGoals = connect(state => ({
+        goals: state.goals
+      }))(Goals);
 
       // API is provided by tyler's script in the HEAD
       class App extends React.Component {
         componentDidMount() {
-          const { store } = this.props;
+          const { dispatch } = this.props;
 
-          store.dispatch(handleInitialFetch());
-
-          store.subscribe(() => this.forceUpdate());
+          dispatch(handleInitialFetch());
         }
 
         render() {
-          const { loading } = this.props.store.getState();
+          const { loading } = this.props;
 
           if (loading === true) {
             return <h3>Loading</h3>;
@@ -409,17 +387,58 @@
         }
       }
 
-      class ConnectedApp extends React.Component {
-        render() {
-          return (
-            <Context.Consumer>
-              {store => <App store={store} />}
-            </Context.Consumer>
-          );
-        }
-      }
+      const ConnectedApp = connect(state => ({
+        loading: state.loading
+      }))(App);
+
+      // connect API: abstraction should render any component, pass it any data it needs from the store - the user should never have to use context, but rather xthey will use our API instead
+
+      // provider component (put store on context), connect (get needed data from context) component
+
+      // in order to tell connect which comp to render, invoke connect and then invoke result of connect, a function, passing it the component you want to render
+
+      // pass the data needed from the store, via function, return object from function, which is data passed to the component to be rendered
 
       const Context = React.createContext();
+      function connect(mapStateToProps) {
+        // return function, that, when invoked, receives a Component
+        return Component => {
+          // so, the reason we create this class is so we can use componentDidMount to trigger a re-render when state is updated. Why not just handle this in the consumer? Because we need access to store and its subscribe method to watch for changes.
+          class Receiver extends React.Component {
+            componentDidMount() {
+              const { subscribe } = this.props.store;
+              this.unsubscribe = subscribe(() => this.forceUpdate());
+            }
+
+            // subscribe returns a function that allows us to unsubscribe, which kills our listeners
+            componentWillUnmount() {
+              this.unsubscribe();
+            }
+
+            render() {
+              const { dispatch, getState } = this.props.store;
+              const state = getState();
+              // this will return an object with all the info this specific component needs
+              const stateNeeded = mapStateToProps(state);
+
+              return <Component {...stateNeeded} dispatch={dispatch} />;
+            }
+          }
+
+          class ConnectedComponent extends React.Component {
+            // grab info from Redux store
+            render() {
+              return (
+                <Context.Consumer>
+                  {store => <Receiver store={store} />}
+                </Context.Consumer>
+              );
+            }
+          }
+          // connect needs to return a brand new component
+          return ConnectedComponent;
+        };
+      }
 
       class Provider extends React.Component {
         render() {
