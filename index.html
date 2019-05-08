@@ -47,129 +47,17 @@
       // APP CODE - what you'd write
 
       // let's get rid of our stringly typed switch comparisons...
-      const ADD_TODO = "ADD_TODO";
-      const REMOVE_TODO = "REMOVE_TODO";
-      const TOGGLE_TODO = "TOGGLE_TODO";
-      const ADD_GOAL = "ADD_GOAL";
-      const REMOVE_GOAL = "REMOVE_GOAL";
-      const RECEIVE_DATA = "RECEIVE_DATA";
 
       // ACTION CREATOR - return an action. This will be invoked by our dispatch.
       // if being passed object to dispatch, Redux should dispatch as normal. If being passed a function to dispatch, it should invoke that method, passing it dispatch.
-      function addTodoAction(todo) {
-        return {
-          type: ADD_TODO,
-          todo
-        };
-      }
-
-      function removeTodoAction(id) {
-        return {
-          type: REMOVE_TODO,
-          id
-        };
-      }
-
-      function toggleTodoAction(id) {
-        return {
-          type: TOGGLE_TODO,
-          id
-        };
-      }
-
-      function addGoalAction(goal) {
-        return {
-          type: ADD_GOAL,
-          goal
-        };
-      }
-
-      function removeGoalAction(id) {
-        return {
-          type: REMOVE_GOAL,
-          id
-        };
-      }
-
-      function receiveDataAction(todos, goals) {
-        return {
-          type: RECEIVE_DATA,
-          goals,
-          todos
-        };
-      }
 
       // async code is here in the action creator rather than in the UI code/component
-      function handleDeleteTodo(todo) {
-        // return a function that is passed our dispatch - this gives us access to call dispatch whenever we need it
-        return dispatch => {
-          dispatch(removeTodoAction(todo.id));
-          return API.deleteTodo(todo.id).catch(() => {
-            dispatch(addTodoAction(todo));
-            alert("Ahhhh! An error occurred, please try again.");
-          });
-        };
-      }
-
-      // callbacks are simply used to reset the input values
-      function handleAddTodo(name, cb) {
-        return dispatch => {
-          return API.saveTodo(name)
-            .then(todo => {
-              dispatch(addTodoAction(todo));
-              cb();
-            })
-            .catch(() => alert("Error! Try adding your todo again, please."));
-        };
-      }
-
-      function handleToggleTodo(id) {
-        return dispatch => {
-          dispatch(toggleTodoAction(id));
-          return API.saveTodoToggle(id).catch(() => {
-            dispatch(toggleTodoAction(id));
-            alert("Ahhhh! An error occurred, please try again.");
-          });
-        };
-      }
-
-      function handleAddGoal(name, cb) {
-        return dispatch => {
-          return API.saveGoal(name)
-            .then(goal => {
-              dispatch(addGoalAction(goal));
-              cb();
-            })
-            .catch(() => alert("Uh-oh! Try adding your goal again, please."));
-        };
-      }
-
-      function handleDeleteGoal(goal) {
-        return dispatch => {
-          dispatch(removeGoalAction(goal.id));
-
-          return API.deleteGoal(goal.id).catch(() => {
-            dispatch(addGoalAction(goal));
-            alert("An error occured, please try again.");
-          });
-        };
-      }
 
       Promise.all([API.fetchTodos(), API.fetchGoals()]).then(
         ([todos, goals]) => {
           store.dispatch(receiveDataAction(todos, goals));
         }
       );
-
-      function handleInitialFetch() {
-        return dispatch => {
-          Promise.all([API.fetchTodos(), API.fetchGoals()])
-            .then(([todos, goals]) => {
-              dispatch(receiveDataAction(todos, goals));
-            })
-            .catch(() => alert("Fetch failed!"));
-        };
-      }
 
       // REDUX MIDDLEWARE
       // ES6 version of middleware, utilizing the implicit return of arrow funcitons
