@@ -8,7 +8,7 @@ const AUTHED_ID = "tylermcginnis";
 
 export function handleInitialData() {
   return dispatch => {
-    return getInitialData().then(([users, polls]) => {
+    return getInitialData().then(({ users, polls }) => {
       // we want to take users, polls and stick in them in state or our redux store, which is accessible via our dispatch
       dispatch(receiveUsers(users));
       dispatch(receivePolls(polls));
